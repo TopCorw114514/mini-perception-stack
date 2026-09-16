@@ -23,6 +23,26 @@ New-Item -ItemType Directory -Force -Path $CacheDirectory, $Destination | Out-Nu
 $archive = Join-Path $CacheDirectory 'uci-har-public.zip'
 $url = 'https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip'
 
+function Test-ZipArchive([string] $Path) {
+    if (-not (Test-Path -LiteralPath $Path)) { return $false }
+    try {
+        Add-Type -AssemblyName System.IO.Compression.FileSystem -ErrorAction SilentlyContinue
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+        $zip.Dispose()
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+# A truncated download looks exactly like a cached one, so the archive is opened
+# before it is trusted.
+if ((Test-Path -LiteralPath $archive) -and -not (Test-ZipArchive $archive)) {
+    Write-Host "the cached archive is incomplete, downloading it again"
+    Remove-Item -LiteralPath $archive -Force
+}
+
 # The UCI server is slow from some networks (single digit kilobytes per second
 # has been observed) and it does not support range requests, so an interrupted
 # download has to start over. curl.exe ships with Windows and reports failures

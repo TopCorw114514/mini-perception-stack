@@ -119,6 +119,14 @@ powershell -ExecutionPolicy Bypass -File tools\fetch_uci_har.ps1
 .\build\msvc\Release\sensekit-stats.exe "D:\datasets\UCI-HAR\UCI HAR Dataset\train\Inertial Signals\body_acc_x_train.txt"
 ```
 
+注意：UCI 的服务器本身很慢，而且**不支持断点续传**，实测过约 9 KB/s，整包要接近两小时。脚本会自动校验下载下来的压缩包是否完整（不完整就重下），中途断掉直接重跑即可。
+
+数据到位之后，一条命令就能做完整的阶段一验收（C++ 与 numpy 交叉验证，含容差判定）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\verify_real_data.ps1
+```
+
 ## 项目结构
 
 ```
