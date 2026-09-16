@@ -17,7 +17,18 @@ constexpr int kUsageOrIoError = 2;
 constexpr int kMalformedData = 3;
 
 [[nodiscard]] fs::path data_file(const std::string& name) {
-    return fs::path(SENSEKIT_TEST_DATA_DIR) / name;
+    // CMake bakes this path in as a UTF-8 string (the project compiles with
+    // /utf-8). Building a std::filesystem::path straight from those bytes would
+    // decode them with the active Windows code page instead, which silently
+    // breaks as soon as the path contains a non-ASCII character - which is
+    // exactly what this repository did after it was moved into a folder with
+    // Chinese characters in its name. Going through char8_t states the encoding
+    // instead of hoping for the right default.
+    static const fs::path root = [] {
+        const auto* utf8 = reinterpret_cast<const char8_t*>(SENSEKIT_TEST_DATA_DIR);
+        return fs::path(std::u8string(utf8));
+    }();
+    return root / name;
 }
 
 [[nodiscard]] std::string read_text(const fs::path& path) {
