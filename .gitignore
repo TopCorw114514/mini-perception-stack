@@ -1,0 +1,28 @@
+# build output
+build/
+out/
+cmake-build-*/
+
+# local / generated data (the real UCI HAR dataset lives outside the repo).
+# Only the root level directory is ignored: tests/data holds committed fixtures.
+/data/
+
+# model artifacts (stage 4)
+*.onnx
+*.ort
+
+# IDE and editor state
+.vs/
+.vscode/*.log
+.cache/
+compile_commands.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# local bootstrap helpers and machine specific CMake overrides
+.bootstrap/
+CMakeUserPresets.json

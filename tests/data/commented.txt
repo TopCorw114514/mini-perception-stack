@@ -1,0 +1,5 @@
+# hand written sample used by the CLI tests
+# two signal channels, one row per sample
+
+5 -5
+-5 5

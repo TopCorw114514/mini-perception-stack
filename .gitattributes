@@ -1,0 +1,10 @@
+# The golden-file tests compare byte for byte, so text files must not be
+# rewritten with CRLF on checkout. Keeping LF everywhere makes the tests behave
+# the same on Windows, Linux and in CI.
+* text=auto eol=lf
+
+# Explicit for the fixtures the tests read directly.
+tests/data/* text eol=lf
+
+# Windows batch files must keep CRLF if they are ever added.
+*.bat text eol=crlf
