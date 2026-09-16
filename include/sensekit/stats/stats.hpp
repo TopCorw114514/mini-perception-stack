@@ -38,4 +38,4 @@ struct ColumnStats {
 [[nodiscard]] ColumnStats compute_column_stats(std::span<const double> values,
                                                Ddof ddof = Ddof::Population);
 
-  }  // namespace sensekit::stats
+}  // namespace sensekit::stats

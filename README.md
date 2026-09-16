@@ -17,6 +17,8 @@
 
 后续四个阶段（信号处理与特征工程 / 传感器融合与状态估计 / 深度学习与模型部署 / 系统集成与性能优化）只在地图里，暂未实现。完整的十步学习闭环见 [docs/learning/ten-step-loop.md](docs/learning/ten-step-loop.md)。
 
+零基础、或者想先把项目跑起来的话，从 [docs/learning/beginner-from-zero.md](docs/learning/beginner-from-zero.md) 开始读：它假设你没写过 C++，从"编译到底是什么"一路讲到能自己动手加一个功能。
+
 ## 环境要求
 
 - Windows 10/11

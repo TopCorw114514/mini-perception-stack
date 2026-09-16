@@ -45,6 +45,8 @@
 
 不要从头到尾读文档。带着下面每一行右边的问题去读，读不到答案就跳过，让问题留在脑子里等下一次撞见。
 
+如果你完全没写过 C++，先用 [beginner-from-zero.md](beginner-from-zero.md) 把项目跑通，再回来读下面这些资料。
+
 | 资料 | 读哪部分 | 读完应该能回答 |
 | --- | --- | --- |
 | CMake 官方 tutorial（`cmake.org` 的 "Step 1~3"） | 前几节全部 | `add_library` / `add_executable` / `target_link_libraries` 三者关系；什么叫「现代 CMake」 |
