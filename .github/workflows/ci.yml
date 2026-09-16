@@ -10,7 +10,10 @@ on:
 jobs:
   build-and-test:
     name: MSVC x64 build and test
-    runs-on: windows-latest
+    # Pinned on purpose: the `windows-latest` alias moves to a newer Visual
+    # Studio over time, and the `Visual Studio 17 2022` generator below has to
+    # match what the image actually ships.
+    runs-on: windows-2022
 
     steps:
       - name: Checkout
@@ -20,7 +23,9 @@ jobs:
         # Only informational. `cl.exe` is deliberately not on PATH here: the
         # Visual Studio generator locates the compiler itself, which is the
         # whole reason this project does not need a vcvars environment.
-        run: cmake --version
+        run: |
+          cmake --version
+          & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -all -products * -format value -property displayName
 
       - name: Configure
         run: cmake --preset msvc
