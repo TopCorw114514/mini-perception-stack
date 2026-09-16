@@ -21,10 +21,24 @@ $ProgressPreference = 'SilentlyContinue'
 New-Item -ItemType Directory -Force -Path $CacheDirectory, $Destination | Out-Null
 
 $archive = Join-Path $CacheDirectory 'uci-har-public.zip'
-if (-not (Test-Path -LiteralPath $archive)) {
-    $url = 'https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip'
+$url = 'https://archive.ics.uci.edu/static/public/240/human+activity+recognition+using+smartphones.zip'
+
+# The UCI server is slow from some networks (single digit kilobytes per second
+# has been observed) and it does not support range requests, so an interrupted
+# download has to start over. curl.exe ships with Windows and reports failures
+# instead of leaving a truncated file behind.
+if (-not (Test-Path -LiteralPath $archive) -or (Get-Item -LiteralPath $archive).Length -eq 0) {
     Write-Host "downloading $url"
-    Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing
+    Write-Host 'this can take a long time on a slow link'
+    if (Get-Command curl.exe -ErrorAction SilentlyContinue) {
+        & curl.exe -L --retry 5 --retry-delay 5 -o $archive $url
+        if ($LASTEXITCODE -ne 0) {
+            throw "curl failed with exit code $LASTEXITCODE - the archive is incomplete, delete it and retry"
+        }
+    }
+    else {
+        Invoke-WebRequest -Uri $url -OutFile $archive -UseBasicParsing
+    }
 }
 else {
     Write-Host "using cached archive $archive"

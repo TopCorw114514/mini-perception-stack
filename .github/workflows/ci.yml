@@ -17,9 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Show the toolchain that the runner provides
-        run: |
-          cmake --version
-          where.exe cl
+        # Only informational. `cl.exe` is deliberately not on PATH here: the
+        # Visual Studio generator locates the compiler itself, which is the
+        # whole reason this project does not need a vcvars environment.
+        run: cmake --version
 
       - name: Configure
         run: cmake --preset msvc
