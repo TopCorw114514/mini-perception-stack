@@ -16,7 +16,9 @@ enum class ExitCode : int {
 };
 
 /// Runs `sensekit-stats`. `args` excludes the program name, exactly like
-/// `argv[1..]`. Results go to `out`, diagnostics to `err`.
+/// `argv[1..]`, and every argument is UTF-8 encoded: apps/sensekit_stats/main.cpp
+/// converts the Windows UTF-16 command line before calling this. Results go to
+/// `out`, diagnostics to `err`.
 ///
 /// Keeping this as a library function instead of a `main()` full of logic is
 /// what makes the end-to-end tests in tests/test_stats_cli.cpp possible without

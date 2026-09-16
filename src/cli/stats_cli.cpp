@@ -31,8 +31,9 @@ struct UsageError : std::runtime_error {
 };
 
 struct Options {
-    std::filesystem::path input;
-    std::filesystem::path output;
+    /// Both paths stay UTF-8 text until they are turned into a path object.
+    std::string input;
+    std::string output;
     io::LoadOptions load;
     stats::Ddof ddof = stats::Ddof::Population;
     std::string columns_spec = "all";
@@ -61,6 +62,14 @@ struct Options {
         begin = comma + 1;
     }
     return parts;
+}
+
+/// Command line arguments arrive as UTF-8 (see stats_cli.hpp). On Windows
+/// `std::filesystem::path(const char*)` would decode those bytes with the active
+/// code page instead and silently point at a different file.
+[[nodiscard]] std::filesystem::path to_path(std::string_view utf8) {
+    const auto* begin = reinterpret_cast<const char8_t*>(utf8.data());
+    return std::filesystem::path(std::u8string(begin, begin + utf8.size()));
 }
 
 [[nodiscard]] bool is_index(std::string_view text) {
@@ -279,7 +288,7 @@ int run_stats_cli(std::span<const std::string> args, std::ostream& out, std::ost
 
     io::NumericTable table;
     try {
-        table = io::load_numeric_table(options.input, options.load);
+        table = io::load_numeric_table(to_path(options.input), options.load);
     } catch (const io::LoadError& error) {
         err << "sensekit-stats: " << error.what() << '\n';
         return to_exit_code(error.kind() == io::LoadErrorKind::FileAccess
@@ -317,15 +326,15 @@ int run_stats_cli(std::span<const std::string> args, std::ostream& out, std::ost
         return to_exit_code(ExitCode::kSuccess);
     }
 
-    std::ofstream file(options.output, std::ios::binary | std::ios::trunc);
+    std::ofstream file(to_path(options.output), std::ios::binary | std::ios::trunc);
     if (!file) {
-        err << "sensekit-stats: cannot open output file '" << options.output.string() << "'\n";
+        err << "sensekit-stats: cannot open output file '" << options.output << "'\n";
         return to_exit_code(ExitCode::kUsageOrIoError);
     }
     file << payload;
     file.flush();
     if (!file) {
-        err << "sensekit-stats: cannot write output file '" << options.output.string() << "'\n";
+        err << "sensekit-stats: cannot write output file '" << options.output << "'\n";
         return to_exit_code(ExitCode::kUsageOrIoError);
     }
     return to_exit_code(ExitCode::kSuccess);

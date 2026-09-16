@@ -207,6 +207,14 @@ struct ParsedField {
     return NumericTable(std::move(column_names), std::move(rows), std::move(source_name));
 }
 
+/// Those bytes are UTF-8. `std::filesystem::path::string()` would convert them
+/// to the active code page on Windows instead, which turns a Chinese folder name
+/// into mojibake in every diagnostic this library prints.
+[[nodiscard]] std::string to_utf8_text(const std::filesystem::path& path) {
+    const auto text = path.u8string();
+    return std::string(reinterpret_cast<const char*>(text.data()), text.size());
+}
+
 }  // namespace
 
 NumericTable parse_numeric_table(const std::string& text,
@@ -218,17 +226,19 @@ NumericTable parse_numeric_table(const std::string& text,
 NumericTable load_numeric_table(const std::filesystem::path& path, const LoadOptions& options) {
     std::ifstream file(path, std::ios::binary);
     if (!file) {
-        throw LoadError(LoadErrorKind::FileAccess, "cannot open input file '" + path.string() + "'");
+        throw LoadError(LoadErrorKind::FileAccess,
+                        "cannot open input file '" + to_utf8_text(path) + "'");
     }
 
     std::ostringstream buffer;
     buffer << file.rdbuf();
     if (file.bad()) {
-        throw LoadError(LoadErrorKind::FileAccess, "cannot read input file '" + path.string() + "'");
+        throw LoadError(LoadErrorKind::FileAccess,
+                        "cannot read input file '" + to_utf8_text(path) + "'");
     }
 
     const std::string content = buffer.str();
-    return parse_impl(content, options, path.string());
+    return parse_impl(content, options, to_utf8_text(path));
 }
 
 }  // namespace sensekit::io
